@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Sign Up — Smart Meal Planner</title>
+
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&display=swap">
+
+<style>
+:root {
+    --bg: #eef3ee;
+    --ink: #17261f;
+    --muted: #5d6f66;
+    --card: #ffffff;
+    --line: #d3ded6;
+    --accent: #e5a117;
+    --accent-ink: #2b1d00;
+    --danger: #b42318;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #101a15;
+        --ink: #e8f0ea;
+        --muted: #92a69a;
+        --card: #18261f;
+        --line: #2b3d33;
+        --accent: #e5a117;
+        --accent-ink: #2b1d00;
+        --danger: #ff8f8f;
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
+
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(229, 161, 23, 0.12),
+            transparent 35%
+        ),
+        var(--bg);
+
+    color: var(--ink);
+    padding: 24px;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 430px;
+}
+
+.brand {
+    text-align: center;
+    margin-bottom: 22px;
+}
+
+.logo {
+    font-size: 42px;
+    margin-bottom: 8px;
+}
+
+.brand h1 {
+    margin: 0;
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+}
+
+.brand p {
+    margin: 7px 0 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 28px;
+
+    box-shadow:
+        0 18px 50px rgba(0, 0, 0, 0.08);
+}
+
+.card h2 {
+    margin: 0 0 6px;
+    font-size: 1.35rem;
+}
+
+.description {
+    color: var(--muted);
+    margin: 0 0 22px;
+    font-size: 0.9rem;
+}
+
+.field {
+    margin-bottom: 16px;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.field input {
+    width: 100%;
+
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+
+    border-radius: 11px;
+    padding: 12px 13px;
+
+    font: inherit;
+    font-size: 0.95rem;
+
+    transition: 0.2s ease;
+}
+
+.field input:focus {
+    outline: none;
+    border-color: var(--accent);
+
+    box-shadow:
+        0 0 0 3px rgba(229, 161, 23, 0.14);
+}
+
+.hint {
+    margin-top: -9px;
+    margin-bottom: 16px;
+
+    color: var(--muted);
+    font-size: 0.76rem;
+}
+
+.signup-button {
+    width: 100%;
+
+    border: 0;
+    border-radius: 11px;
+
+    padding: 12px 16px;
+
+    background: var(--accent);
+    color: var(--accent-ink);
+
+    font: inherit;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.15s ease,
+        opacity 0.15s ease;
+}
+
+.signup-button:hover {
+    transform: translateY(-1px);
+}
+
+.signup-button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}
+
+.error {
+    display: none;
+
+    margin-bottom: 16px;
+    padding: 11px 13px;
+
+    border-radius: 10px;
+
+    background: rgba(180, 35, 24, 0.09);
+    border: 1px solid rgba(180, 35, 24, 0.22);
+
+    color: var(--danger);
+
+    font-size: 0.88rem;
+    line-height: 1.4;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 20px;
+
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.login-link a {
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+.footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.75rem;
+    margin-top: 18px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="auth-container">
+
+    <div class="brand">
+
+        <div class="logo">🍱</div>
+
+        <h1>Smart Meal Planner</h1>
+
+        <p>
+            Personalized meal planning powered by AI
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Create your account</h2>
+
+        <p class="description">
+            Start building smarter meal plans in seconds.
+        </p>
+
+        <div id="error" class="error"></div>
+
+        <form id="signupForm">
+
+            <div class="field">
+
+                <label for="name">
+                    Full name
+                </label>
+
+                <input
+                    id="name"
+                    type="text"
+                    placeholder="Your name"
+                    autocomplete="name"
+                    required
+                >
+
+            </div>
+
+            <div class="field">
+
+                <label for="email">
+                    Email
+                </label>
+
+                <input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    autocomplete="email"
+                    required
+                >
+
+            </div>
+
+            <div class="field">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    id="password"
+                    type="password"
+                    placeholder="Create a password"
+                    autocomplete="new-password"
+                    minlength="6"
+                    required
+                >
+
+            </div>
+
+            <div class="hint">
+                Password must contain at least 6 characters.
+            </div>
+
+            <div class="field">
+
+                <label for="confirmPassword">
+                    Confirm password
+                </label>
+
+                <input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="Enter password again"
+                    autocomplete="new-password"
+                    minlength="6"
+                    required
+                >
+
+            </div>
+
+            <button
+                id="signupButton"
+                class="signup-button"
+                type="submit"
+            >
+                Create account
+            </button>
+
+        </form>
+
+        <div class="login-link">
+            Already have an account?
+            <a href="/login">Log in</a>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        Smart Meal Planner · AI Subject CA2
+    </div>
+
+</div>
+
+<script>
+const form = document.getElementById("signupForm");
+const button = document.getElementById("signupButton");
+const errorBox = document.getElementById("error");
+
+function showError(message) {
+    errorBox.textContent = message;
+    errorBox.style.display = "block";
+}
+
+form.addEventListener("submit", async (event) => {
+
+    event.preventDefault();
+
+    errorBox.style.display = "none";
+
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const confirmPassword =
+        document.getElementById("confirmPassword").value;
+
+    if (password !== confirmPassword) {
+
+        showError("Passwords do not match.");
+
+        return;
+    }
+
+    if (password.length < 6) {
+
+        showError(
+            "Password must contain at least 6 characters."
+        );
+
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = "Creating account…";
+
+    try {
+
+        const response = await fetch("/signup", {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                name: name,
+                email: email,
+                password: password
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+
+            showError(
+                data.error ||
+                "Unable to create the account."
+            );
+
+            return;
+        }
+
+        // Account created and automatically logged in.
+        window.location.href = "/";
+
+    } catch (error) {
+
+        showError(
+            "Cannot connect to the server. Make sure web_app.py is running."
+        );
+
+    } finally {
+
+        button.disabled = false;
+        button.textContent = "Create account";
+
+    }
+});
+</script>
+
+</body>
+</html>

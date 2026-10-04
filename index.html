@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Meal Planner</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#eef3ee;--ink:#17261f;--muted:#5d6f66;--card:#fff;--line:#d3ded6;--accent:#e5a117;--accent-ink:#2b1d00;--user:#17261f;--user-ink:#f3f7f3}
+@media (prefers-color-scheme:dark){:root{--bg:#101a15;--ink:#e8f0ea;--muted:#92a69a;--card:#18261f;--line:#2b3d33;--user:#e5a117;--user-ink:#2b1d00}}
+*{box-sizing:border-box}
+html,body{
+    min-height:100%;
+    margin:0;
+}
+body{font-family:"Bricolage Grotesque",system-ui,sans-serif;background:var(--bg);color:var(--ink);display:flex;justify-content:center}
+.app{
+    width:100%;
+    max-width:760px;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding:0 16px
+}
+header{display:flex;align-items:baseline;justify-content:space-between;padding:20px 0 12px}
+h1{font-size:1.6rem;font-weight:800;margin:0;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:.9rem;margin:2px 0 0}
+button{font:inherit;cursor:pointer}
+.ghost{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:6px 12px}
+.ghost:hover,.chip:hover{border-color:var(--accent);color:var(--ink)}
+#log{
+    padding:8px 0 16px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+.msg{max-width:92%;padding:12px 16px;border-radius:14px;line-height:1.55;overflow-x:auto}
+.bot{align-self:flex-start;background:var(--card);border:1px solid var(--line)}
+.me{align-self:flex-end;background:var(--user);color:var(--user-ink);border-radius:14px 14px 4px 14px}
+.msg p{margin:0 0 .6em}.msg p:last-child{margin:0}
+.msg table{border-collapse:collapse;margin:.5em 0;font-size:.9rem;min-width:100%}
+.msg th,.msg td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+.msg th{background:color-mix(in srgb,var(--accent) 22%,transparent)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;color:var(--ink)}
+form{display:flex;gap:8px;padding:12px 0 calc(16px + env(safe-area-inset-bottom,0px))}
+textarea{flex:1;font:inherit;resize:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:12px 14px;max-height:140px}
+textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+#send{background:var(--accent);color:var(--accent-ink);border:0;border-radius:12px;padding:0 20px;font-weight:600}
+#send:disabled{opacity:.5;cursor:wait}
+.dots{color:var(--muted)}
+/* Normal page scrolling - remove inner chat scrollbar */
+.msg {
+    height: auto !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+    overflow-x: hidden;
+}
+
+/* Let the whole page scroll normally */
+body {
+    overflow-y: auto !important;
+}
+
+.chat-container {
+    height: auto !important;
+    min-height: 0 !important;
+}
+
+.quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.quick-actions button {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+    color: #e8eee9;
+    padding: 9px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: 0.2s ease;
+}
+
+.quick-actions button:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-1px);
+}
+
+.agent-activity {
+    margin: 12px 0;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.activity-title {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    opacity: 0.8;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    margin: 5px 0;
+    opacity: 0.75;
+}
+
+.activity-check {
+    font-size: 11px;
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div><h1>Smart Meal Planner</h1><p class="sub">Weekly plans, calorie checks and a grocery list.</p></div>
+    <button class="ghost" id="reset" type="button">New chat</button>
+  </header>
+  <main id="log" aria-live="polite"></main>
+  <form id="form">
+    <textarea id="input" rows="1" placeholder="e.g. 5-day vegetarian plan, 1800 kcal, 2 people" aria-label="Message"></textarea>
+    <button id="send" type="submit">Send</button>
+  </form>
+  <div class="quick-actions">
+
+    <button onclick="quickAction('Generate a categorized grocery list for the current meal plan.')">
+        🛒 Grocery List
+    </button>
+
+    <button onclick="quickAction('Analyze the current meal plan and improve it if necessary.')">
+        🔍 Analyze Plan
+    </button>
+
+    <button onclick="quickAction('Create a practical meal-preparation schedule for the current plan.')">
+        🍳 Meal Prep
+    </button>
+
+    <button onclick="quickAction('Save the current meal plan.')">
+        💾 Save Plan
+    </button>
+
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<script>
+const log = document.getElementById('log');
+const input = document.getElementById('input');
+const send = document.getElementById('send');
+
+const newId = () =>
+  Math.random().toString(36).slice(2) + Date.now().toString(36);
+
+let sid = newId();
+
+const starters = [
+  "5-day vegetarian plan, 1800 kcal, 2 people",
+  "High-protein non-veg week under 30 min/meal",
+  "3-day vegan plan with a grocery list"
+];
+
+function render(el, text) {
+  el.innerHTML =
+    (window.marked && window.DOMPurify)
+      ? DOMPurify.sanitize(marked.parse(text))
+      : '';
+
+  if (!el.innerHTML) {
+    el.textContent = text;
+  }
+}
+
+function add(text, who) {
+  const el = document.createElement('div');
+
+  el.className = 'msg ' + who;
+
+  if (who === 'bot') {
+    render(el, text);
+  } else {
+    el.textContent = text;
+  }
+
+  log.appendChild(el);
+
+  window.scrollTo({
+    top: document.body.scrollHeight,
+    behavior: 'smooth'
+  });
+
+  return el;
+}
+
+function welcome() {
+  log.innerHTML = '';
+
+  add(
+    "Tell me your diet, number of days, people and calorie goal, and I'll build the plan. Or start with one of these:",
+    'bot'
+  );
+
+  const chips = document.createElement('div');
+  chips.className = 'chips';
+
+  starters.forEach(t => {
+    const b = document.createElement('button');
+
+    b.type = 'button';
+    b.className = 'chip';
+    b.textContent = t;
+
+    b.onclick = () => ask(t);
+
+    chips.appendChild(b);
+  });
+
+  log.appendChild(chips);
+}
+
+
+/* Quick action buttons */
+function quickAction(message) {
+  ask(message);
+}
+
+
+/* Show what the AI agent is doing */
+function showActivities(activities) {
+
+  if (!activities || activities.length === 0) {
+    return;
+  }
+
+  const activityBox = document.createElement('div');
+
+  activityBox.className = 'agent-activity';
+
+  activityBox.innerHTML = `
+    <div class="activity-title">
+      ✨ Agent activity
+    </div>
+  `;
+
+  activities.forEach(activity => {
+
+    const item = document.createElement('div');
+
+    item.className = 'activity-item';
+
+    item.innerHTML = `
+      <span class="activity-check">✓</span>
+      <span>${activity.label}</span>
+    `;
+
+    activityBox.appendChild(item);
+  });
+
+  log.appendChild(activityBox);
+}
+
+
+/* Send message to Flask */
+async function ask(text) {
+
+  if (!text.trim() || send.disabled) {
+    return;
+  }
+
+  add(text, 'me');
+
+  input.value = '';
+  input.style.height = 'auto';
+
+  send.disabled = true;
+
+  const wait = add('Planning…', 'bot');
+
+  wait.classList.add('dots');
+
+  try {
+
+    const r = await fetch('/chat', {
+      method: 'POST',
+
+      headers: {
+        'Content-Type': 'application/json'
+      },
+
+      body: JSON.stringify({
+        session_id: sid,
+        message: text
+      })
+    });
+
+    const d = await r.json();
+
+    /* Show agent activity */
+    if (d.activities) {
+      showActivities(d.activities);
+    }
+
+    /* Show final response */
+    wait.classList.remove('dots');
+
+    render(
+      wait,
+      d.reply || d.error || 'No response.'
+    );
+
+  } catch (e) {
+
+    wait.classList.remove('dots');
+
+    wait.textContent =
+      "Can't reach the server. Is web_app.py still running?";
+
+    console.error(e);
+
+  }
+
+  send.disabled = false;
+
+  window.scrollTo({
+    top: document.body.scrollHeight,
+    behavior: 'smooth'
+  });
+
+  input.focus();
+}
+
+
+/* Normal Send button */
+document.getElementById('form').onsubmit = e => {
+
+  e.preventDefault();
+
+  ask(input.value);
+};
+
+
+/* Enter = Send */
+input.onkeydown = e => {
+
+  if (e.key === 'Enter' && !e.shiftKey) {
+
+    e.preventDefault();
+
+    ask(input.value);
+  }
+};
+
+
+/* Auto-grow textbox */
+input.oninput = () => {
+
+  input.style.height = 'auto';
+
+  input.style.height =
+    input.scrollHeight + 'px';
+};
+
+
+/* New chat */
+document.getElementById('reset').onclick = () => {
+
+  fetch('/reset', {
+    method: 'POST',
+
+    headers: {
+      'Content-Type': 'application/json'
+    },
+
+    body: JSON.stringify({
+      session_id: sid
+    })
+  });
+
+  sid = newId();
+
+  welcome();
+};
+
+
+/* Initial screen */
+welcome();
+</script>
+</body>
+</html>

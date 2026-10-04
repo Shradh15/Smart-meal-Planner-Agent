@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Login — Smart Meal Planner</title>
+
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&display=swap">
+
+<style>
+:root {
+    --bg: #eef3ee;
+    --ink: #17261f;
+    --muted: #5d6f66;
+    --card: #ffffff;
+    --line: #d3ded6;
+    --accent: #e5a117;
+    --accent-ink: #2b1d00;
+    --danger: #b42318;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #101a15;
+        --ink: #e8f0ea;
+        --muted: #92a69a;
+        --card: #18261f;
+        --line: #2b3d33;
+        --accent: #e5a117;
+        --accent-ink: #2b1d00;
+        --danger: #ff8f8f;
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
+
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(229, 161, 23, 0.12),
+            transparent 35%
+        ),
+        var(--bg);
+
+    color: var(--ink);
+    padding: 24px;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 430px;
+}
+
+.brand {
+    text-align: center;
+    margin-bottom: 22px;
+}
+
+.logo {
+    font-size: 42px;
+    margin-bottom: 8px;
+}
+
+.brand h1 {
+    margin: 0;
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+}
+
+.brand p {
+    margin: 7px 0 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
+}
+
+.card h2 {
+    margin: 0 0 6px;
+    font-size: 1.35rem;
+}
+
+.description {
+    color: var(--muted);
+    margin: 0 0 22px;
+    font-size: 0.9rem;
+}
+
+.field {
+    margin-bottom: 16px;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.field input {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+
+    border-radius: 11px;
+    padding: 12px 13px;
+
+    font: inherit;
+    font-size: 0.95rem;
+
+    transition: 0.2s ease;
+}
+
+.field input:focus {
+    outline: none;
+    border-color: var(--accent);
+
+    box-shadow:
+        0 0 0 3px rgba(229, 161, 23, 0.14);
+}
+
+.login-button {
+    width: 100%;
+    border: 0;
+    border-radius: 11px;
+
+    padding: 12px 16px;
+
+    background: var(--accent);
+    color: var(--accent-ink);
+
+    font: inherit;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.15s ease,
+        opacity 0.15s ease;
+}
+
+.login-button:hover {
+    transform: translateY(-1px);
+}
+
+.login-button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}
+
+.error {
+    display: none;
+
+    margin-bottom: 16px;
+    padding: 11px 13px;
+
+    border-radius: 10px;
+
+    background: rgba(180, 35, 24, 0.09);
+    border: 1px solid rgba(180, 35, 24, 0.22);
+
+    color: var(--danger);
+
+    font-size: 0.88rem;
+    line-height: 1.4;
+}
+
+.signup-link {
+    text-align: center;
+    margin-top: 20px;
+
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.signup-link a {
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.signup-link a:hover {
+    text-decoration: underline;
+}
+
+.footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.75rem;
+    margin-top: 18px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="auth-container">
+
+    <div class="brand">
+        <div class="logo">🍱</div>
+
+        <h1>Smart Meal Planner</h1>
+
+        <p>
+            Personalized meal planning powered by AI
+        </p>
+    </div>
+
+    <div class="card">
+
+        <h2>Welcome back</h2>
+
+        <p class="description">
+            Sign in to continue planning your meals.
+        </p>
+
+        <div id="error" class="error"></div>
+
+        <form id="loginForm">
+
+            <div class="field">
+                <label for="email">
+                    Email
+                </label>
+
+                <input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    autocomplete="email"
+                    required
+                >
+            </div>
+
+            <div class="field">
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    id="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                >
+            </div>
+
+            <button
+                id="loginButton"
+                class="login-button"
+                type="submit"
+            >
+                Log in
+            </button>
+
+        </form>
+
+        <div class="signup-link">
+            Don't have an account?
+            <a href="/signup">Create one</a>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        Smart Meal Planner · AI Subject CA2
+    </div>
+
+</div>
+
+<script>
+const form = document.getElementById("loginForm");
+const button = document.getElementById("loginButton");
+const errorBox = document.getElementById("error");
+
+function showError(message) {
+    errorBox.textContent = message;
+    errorBox.style.display = "block";
+}
+
+form.addEventListener("submit", async (event) => {
+
+    event.preventDefault();
+
+    errorBox.style.display = "none";
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    button.disabled = true;
+    button.textContent = "Logging in…";
+
+    try {
+
+        const response = await fetch("/login", {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            showError(
+                data.error || "Unable to log in. Please try again."
+            );
+
+            return;
+        }
+
+        // Login successful.
+        window.location.href = "/";
+
+    } catch (error) {
+
+        showError(
+            "Cannot connect to the server. Make sure web_app.py is running."
+        );
+
+    } finally {
+
+        button.disabled = false;
+        button.textContent = "Log in";
+
+    }
+});
+</script>
+
+</body>
+</html>
